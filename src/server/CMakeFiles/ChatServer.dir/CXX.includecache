@@ -1,0 +1,14 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/lighthouse/chat_server/src/server/chatserver.cpp
+chatserver.h
+/home/lighthouse/chat_server/src/server/chatserver.h
+iostream
+-
+

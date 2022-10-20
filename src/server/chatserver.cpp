@@ -1,0 +1,45 @@
+#include "chatserver.h"
+#include "chatservice.h"
+#include<json.hpp>
+#include<iostream>
+using  json=nlohmann::json;
+
+
+//构造函数设置回调
+ChatServer::ChatServer(EventLoop* loop,const InetAddress& listenAddr,const string& nameArg):loop_(loop),tcpserver_(loop_,listenAddr,nameArg){
+    tcpserver_.setConnectionCallback(std::bind(&ChatServer::onConnection,this,std::placeholders::_1));
+    //_1,_2,_3是占位符，muduo库内部调用时会填充这些参数
+    tcpserver_.setMessageCallback(std::bind(&ChatServer::onMessage,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3));
+    //4个线程,1个I/O线程，3个工作线程
+    tcpserver_.setThreadNum(4);
+};
+void ChatServer::start(){
+    tcpserver_.start();
+}
+ChatServer::~ChatServer(){};
+void ChatServer::onConnection(const TcpConnectionPtr& conn){
+    if(!conn->connected()){
+        conn->shutdown();
+    }
+    
+}
+//专门处理用户的读写事件
+void ChatServer::onMessage(const TcpConnectionPtr& conn,
+                        Buffer* buffer,
+                        Timestamp timestamp){
+    string buf=buffer->retrieveAllAsString();
+    json js=json::parse(buf);
+    /*为解耦网络模块和业务模块的代码，不将业务模块的方法写在这，
+    而是通过函数回调的方式调用业务模块的方法*/ 
+    auto mesgHandler=chatservice::getInstance()->getHandler(js["mesgid"].get<int>());
+    mesgHandler(conn,js,timestamp);
+}
+
+int main(){
+    EventLoop loop;
+    InetAddress listenaddr("127.0.0.1",6000);
+    ChatServer chatserver(&loop,listenaddr,"my_server");
+    chatserver.start();
+    //epoll_wait以阻塞的方式等待新用户的连接或读写事件的发生等
+    loop.loop();
+}
