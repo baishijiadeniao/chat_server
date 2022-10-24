@@ -6,7 +6,7 @@
 static std::string server = "127.0.0.1";
 static std::string user = "root";
 static std::string password = "123456";
-static std::string dbname = "chat";
+static std::string dbname = "chat_server";
 
 // 数据库操作类
 class MySQL
@@ -22,6 +22,8 @@ public:
     bool update(std::string sql);
     // 查询操作
     MYSQL_RES* query(std::string sql);
+    //获取connection_id
+    MYSQL* getConnection();
 private:
     MYSQL *_conn;
 };

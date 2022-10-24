@@ -206,6 +206,114 @@ db/db.cpp.s:
 	cd /home/lighthouse/chat_server/build && $(MAKE) -f src/server/CMakeFiles/ChatServer.dir/build.make src/server/CMakeFiles/ChatServer.dir/db/db.cpp.s
 .PHONY : db/db.cpp.s
 
+friendmodel.o: friendmodel.cpp.o
+
+.PHONY : friendmodel.o
+
+# target to build an object file
+friendmodel.cpp.o:
+	cd /home/lighthouse/chat_server/build && $(MAKE) -f src/server/CMakeFiles/ChatServer.dir/build.make src/server/CMakeFiles/ChatServer.dir/friendmodel.cpp.o
+.PHONY : friendmodel.cpp.o
+
+friendmodel.i: friendmodel.cpp.i
+
+.PHONY : friendmodel.i
+
+# target to preprocess a source file
+friendmodel.cpp.i:
+	cd /home/lighthouse/chat_server/build && $(MAKE) -f src/server/CMakeFiles/ChatServer.dir/build.make src/server/CMakeFiles/ChatServer.dir/friendmodel.cpp.i
+.PHONY : friendmodel.cpp.i
+
+friendmodel.s: friendmodel.cpp.s
+
+.PHONY : friendmodel.s
+
+# target to generate assembly for a file
+friendmodel.cpp.s:
+	cd /home/lighthouse/chat_server/build && $(MAKE) -f src/server/CMakeFiles/ChatServer.dir/build.make src/server/CMakeFiles/ChatServer.dir/friendmodel.cpp.s
+.PHONY : friendmodel.cpp.s
+
+main.o: main.cpp.o
+
+.PHONY : main.o
+
+# target to build an object file
+main.cpp.o:
+	cd /home/lighthouse/chat_server/build && $(MAKE) -f src/server/CMakeFiles/ChatServer.dir/build.make src/server/CMakeFiles/ChatServer.dir/main.cpp.o
+.PHONY : main.cpp.o
+
+main.i: main.cpp.i
+
+.PHONY : main.i
+
+# target to preprocess a source file
+main.cpp.i:
+	cd /home/lighthouse/chat_server/build && $(MAKE) -f src/server/CMakeFiles/ChatServer.dir/build.make src/server/CMakeFiles/ChatServer.dir/main.cpp.i
+.PHONY : main.cpp.i
+
+main.s: main.cpp.s
+
+.PHONY : main.s
+
+# target to generate assembly for a file
+main.cpp.s:
+	cd /home/lighthouse/chat_server/build && $(MAKE) -f src/server/CMakeFiles/ChatServer.dir/build.make src/server/CMakeFiles/ChatServer.dir/main.cpp.s
+.PHONY : main.cpp.s
+
+offlinemessagemodel.o: offlinemessagemodel.cpp.o
+
+.PHONY : offlinemessagemodel.o
+
+# target to build an object file
+offlinemessagemodel.cpp.o:
+	cd /home/lighthouse/chat_server/build && $(MAKE) -f src/server/CMakeFiles/ChatServer.dir/build.make src/server/CMakeFiles/ChatServer.dir/offlinemessagemodel.cpp.o
+.PHONY : offlinemessagemodel.cpp.o
+
+offlinemessagemodel.i: offlinemessagemodel.cpp.i
+
+.PHONY : offlinemessagemodel.i
+
+# target to preprocess a source file
+offlinemessagemodel.cpp.i:
+	cd /home/lighthouse/chat_server/build && $(MAKE) -f src/server/CMakeFiles/ChatServer.dir/build.make src/server/CMakeFiles/ChatServer.dir/offlinemessagemodel.cpp.i
+.PHONY : offlinemessagemodel.cpp.i
+
+offlinemessagemodel.s: offlinemessagemodel.cpp.s
+
+.PHONY : offlinemessagemodel.s
+
+# target to generate assembly for a file
+offlinemessagemodel.cpp.s:
+	cd /home/lighthouse/chat_server/build && $(MAKE) -f src/server/CMakeFiles/ChatServer.dir/build.make src/server/CMakeFiles/ChatServer.dir/offlinemessagemodel.cpp.s
+.PHONY : offlinemessagemodel.cpp.s
+
+usermodel.o: usermodel.cpp.o
+
+.PHONY : usermodel.o
+
+# target to build an object file
+usermodel.cpp.o:
+	cd /home/lighthouse/chat_server/build && $(MAKE) -f src/server/CMakeFiles/ChatServer.dir/build.make src/server/CMakeFiles/ChatServer.dir/usermodel.cpp.o
+.PHONY : usermodel.cpp.o
+
+usermodel.i: usermodel.cpp.i
+
+.PHONY : usermodel.i
+
+# target to preprocess a source file
+usermodel.cpp.i:
+	cd /home/lighthouse/chat_server/build && $(MAKE) -f src/server/CMakeFiles/ChatServer.dir/build.make src/server/CMakeFiles/ChatServer.dir/usermodel.cpp.i
+.PHONY : usermodel.cpp.i
+
+usermodel.s: usermodel.cpp.s
+
+.PHONY : usermodel.s
+
+# target to generate assembly for a file
+usermodel.cpp.s:
+	cd /home/lighthouse/chat_server/build && $(MAKE) -f src/server/CMakeFiles/ChatServer.dir/build.make src/server/CMakeFiles/ChatServer.dir/usermodel.cpp.s
+.PHONY : usermodel.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -224,6 +332,18 @@ help:
 	@echo "... db/db.o"
 	@echo "... db/db.i"
 	@echo "... db/db.s"
+	@echo "... friendmodel.o"
+	@echo "... friendmodel.i"
+	@echo "... friendmodel.s"
+	@echo "... main.o"
+	@echo "... main.i"
+	@echo "... main.s"
+	@echo "... offlinemessagemodel.o"
+	@echo "... offlinemessagemodel.i"
+	@echo "... offlinemessagemodel.s"
+	@echo "... usermodel.o"
+	@echo "... usermodel.i"
+	@echo "... usermodel.s"
 .PHONY : help
 
 

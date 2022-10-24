@@ -13,16 +13,19 @@ ChatServer::ChatServer(EventLoop* loop,const InetAddress& listenAddr,const strin
     //4个线程,1个I/O线程，3个工作线程
     tcpserver_.setThreadNum(4);
 };
+
 void ChatServer::start(){
     tcpserver_.start();
 }
+
 ChatServer::~ChatServer(){};
 void ChatServer::onConnection(const TcpConnectionPtr& conn){
     if(!conn->connected()){
+        chatservice::getInstance()->clientCloseException(conn);
         conn->shutdown();
     }
-    
 }
+
 //专门处理用户的读写事件
 void ChatServer::onMessage(const TcpConnectionPtr& conn,
                         Buffer* buffer,
@@ -31,15 +34,6 @@ void ChatServer::onMessage(const TcpConnectionPtr& conn,
     json js=json::parse(buf);
     /*为解耦网络模块和业务模块的代码，不将业务模块的方法写在这，
     而是通过函数回调的方式调用业务模块的方法*/ 
-    auto mesgHandler=chatservice::getInstance()->getHandler(js["mesgid"].get<int>());
+    auto mesgHandler=chatservice::getInstance()->getHandler(js["msgid"].get<int>());
     mesgHandler(conn,js,timestamp);
-}
-
-int main(){
-    EventLoop loop;
-    InetAddress listenaddr("127.0.0.1",6000);
-    ChatServer chatserver(&loop,listenaddr,"my_server");
-    chatserver.start();
-    //epoll_wait以阻塞的方式等待新用户的连接或读写事件的发生等
-    loop.loop();
 }

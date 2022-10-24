@@ -10,9 +10,9 @@ MySQL::MySQL()
 
 // 释放数据库连接资源
 MySQL::~MySQL()
-    {
+{
     if (_conn != nullptr)
-    mysql_close(_conn);
+        mysql_close(_conn);
 }
 
 // 连接数据库
@@ -22,7 +22,10 @@ bool MySQL::connect()
     password.c_str(), dbname.c_str(), 3306, nullptr, 0);
     if (p != nullptr)
     {
-    mysql_query(_conn, "set names gbk");
+        mysql_query(_conn, "set names gbk");
+        LOG_INFO<<"connect mysql success";
+    }else{
+        LOG_INFO<<"connect mysql failed";
     }
     return p;
 }
@@ -49,4 +52,8 @@ MYSQL_RES* MySQL::query(std::string sql)
     return nullptr;
     }
     return mysql_use_result(_conn);
+}
+
+MYSQL* MySQL::getConnection(){
+    return _conn;
 }

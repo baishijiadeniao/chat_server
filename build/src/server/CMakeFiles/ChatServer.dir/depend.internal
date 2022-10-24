@@ -4,11 +4,44 @@
 src/server/CMakeFiles/ChatServer.dir/chatserver.cpp.o
  ../include/server/chatserver.h
  ../include/server/chatservice.h
+ ../include/server/db/db.h
+ ../include/server/friendmodel.h
+ ../include/server/offlinemessagemodel.h
+ ../include/server/user.h
+ ../include/server/usermodel.h
  /home/lighthouse/chat_server/src/server/chatserver.cpp
 src/server/CMakeFiles/ChatServer.dir/chatservice.cpp.o
  ../include/public.h
  ../include/server/chatservice.h
+ ../include/server/db/db.h
+ ../include/server/friendmodel.h
+ ../include/server/offlinemessagemodel.h
+ ../include/server/user.h
+ ../include/server/usermodel.h
  /home/lighthouse/chat_server/src/server/chatservice.cpp
 src/server/CMakeFiles/ChatServer.dir/db/db.cpp.o
  ../include/server/db/db.h
  /home/lighthouse/chat_server/src/server/db/db.cpp
+src/server/CMakeFiles/ChatServer.dir/friendmodel.cpp.o
+ ../include/server/db/db.h
+ ../include/server/friendmodel.h
+ ../include/server/user.h
+ /home/lighthouse/chat_server/src/server/friendmodel.cpp
+src/server/CMakeFiles/ChatServer.dir/main.cpp.o
+ ../include/server/chatserver.h
+ ../include/server/chatservice.h
+ ../include/server/db/db.h
+ ../include/server/friendmodel.h
+ ../include/server/offlinemessagemodel.h
+ ../include/server/user.h
+ ../include/server/usermodel.h
+ /home/lighthouse/chat_server/src/server/main.cpp
+src/server/CMakeFiles/ChatServer.dir/offlinemessagemodel.cpp.o
+ ../include/server/db/db.h
+ ../include/server/offlinemessagemodel.h
+ /home/lighthouse/chat_server/src/server/offlinemessagemodel.cpp
+src/server/CMakeFiles/ChatServer.dir/usermodel.cpp.o
+ ../include/server/db/db.h
+ ../include/server/user.h
+ ../include/server/usermodel.h
+ /home/lighthouse/chat_server/src/server/usermodel.cpp
