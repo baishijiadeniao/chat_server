@@ -7,10 +7,11 @@ set(CMAKE_DEPENDS_CHECK_CXX
   "/home/lighthouse/chat_server/src/server/chatserver.cpp" "/home/lighthouse/chat_server/build/src/server/CMakeFiles/ChatServer.dir/chatserver.cpp.o"
   "/home/lighthouse/chat_server/src/server/chatservice.cpp" "/home/lighthouse/chat_server/build/src/server/CMakeFiles/ChatServer.dir/chatservice.cpp.o"
   "/home/lighthouse/chat_server/src/server/db/db.cpp" "/home/lighthouse/chat_server/build/src/server/CMakeFiles/ChatServer.dir/db/db.cpp.o"
-  "/home/lighthouse/chat_server/src/server/friendmodel.cpp" "/home/lighthouse/chat_server/build/src/server/CMakeFiles/ChatServer.dir/friendmodel.cpp.o"
   "/home/lighthouse/chat_server/src/server/main.cpp" "/home/lighthouse/chat_server/build/src/server/CMakeFiles/ChatServer.dir/main.cpp.o"
-  "/home/lighthouse/chat_server/src/server/offlinemessagemodel.cpp" "/home/lighthouse/chat_server/build/src/server/CMakeFiles/ChatServer.dir/offlinemessagemodel.cpp.o"
-  "/home/lighthouse/chat_server/src/server/usermodel.cpp" "/home/lighthouse/chat_server/build/src/server/CMakeFiles/ChatServer.dir/usermodel.cpp.o"
+  "/home/lighthouse/chat_server/src/server/model/friendmodel.cpp" "/home/lighthouse/chat_server/build/src/server/CMakeFiles/ChatServer.dir/model/friendmodel.cpp.o"
+  "/home/lighthouse/chat_server/src/server/model/groupmodel.cpp" "/home/lighthouse/chat_server/build/src/server/CMakeFiles/ChatServer.dir/model/groupmodel.cpp.o"
+  "/home/lighthouse/chat_server/src/server/model/offlinemessagemodel.cpp" "/home/lighthouse/chat_server/build/src/server/CMakeFiles/ChatServer.dir/model/offlinemessagemodel.cpp.o"
+  "/home/lighthouse/chat_server/src/server/model/usermodel.cpp" "/home/lighthouse/chat_server/build/src/server/CMakeFiles/ChatServer.dir/model/usermodel.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 
@@ -19,6 +20,7 @@ set(CMAKE_CXX_TARGET_INCLUDE_PATH
   "../include"
   "../include/server"
   "../include/server/db"
+  "../include/server/model"
   "/thirdparty"
   )
 

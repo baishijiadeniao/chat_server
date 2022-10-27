@@ -10,6 +10,8 @@
 #include"usermodel.h"
 #include"friendmodel.h"
 #include"offlinemessagemodel.h"
+#include"groupmodel.h"
+
 using namespace muduo;
 using namespace muduo::net;
 using  json=nlohmann::json;
@@ -29,12 +31,17 @@ private:
     mutex connMutex_;
     //User操作类对象
     UserModel usermodel_;
+    //Friend操作类对象
     friendModel friendmodel_;
+    //offlineMessage操作类对象
     offlineMsgModel offlineMsgModel_;
+    //AllGroup、GroupUser操作类对象
+    groupModel groupModel_;
     //单例模式私有化构造函数
     chatservice();
     ~chatservice();
     chatservice(const chatservice&);
+    
 public:
     //单例模式获取静态对象接口
     static chatservice* getInstance();
@@ -52,4 +59,12 @@ public:
     void reset();
     //添加好友
     void addFriend(const TcpConnectionPtr& conn,json &js,Timestamp timestamp);
+    //创建群聊
+    void createGroup(const TcpConnectionPtr& conn,json &js,Timestamp timestamp);
+    //加入群聊
+    void addGroup(const TcpConnectionPtr& conn,json &js,Timestamp timestamp);
+    //发送群消息
+    void groupChat(const TcpConnectionPtr& conn,json &js,Timestamp timestamp);
+    //退出登录
+    void loginout(const TcpConnectionPtr& conn,json &js,Timestamp timestamp);
 };

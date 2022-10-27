@@ -6,5 +6,5 @@ CXX_FLAGS = -g
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/lighthouse/chat_server/include -I/home/lighthouse/chat_server/include/server -I/home/lighthouse/chat_server/include/server/db -I/thirdparty 
+CXX_INCLUDES = -I/home/lighthouse/chat_server/include -I/home/lighthouse/chat_server/include/server -I/home/lighthouse/chat_server/include/server/db -I/home/lighthouse/chat_server/include/server/model -I/thirdparty 
 

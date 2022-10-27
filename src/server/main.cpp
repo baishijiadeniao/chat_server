@@ -26,4 +26,6 @@ int main(){
 {"msgid":3,"name":"li si","password":"123456"}
 {"msgid":5,"id":1,"from":"zhangasan","to":2,"msg":"hello"}
 {"msgid":6,"id":1,"friendid":2}
+
+//数据量以万计
 */
