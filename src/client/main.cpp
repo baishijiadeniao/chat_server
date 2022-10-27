@@ -241,10 +241,8 @@ void doLoginResponse(json& responsejs){
         //设置g_currentUser
         g_currentUser.setId(responsejs["id"].get<int>());
         g_currentUser.setName(responsejs["name"]);
-        cout<<"run to here4"<<endl;
         //记录当前用户的好友列表信息
         if(responsejs.contains("friends")){
-            cout<<"run to here5"<<endl;
             //初始化
             g_currentUserFriendList.clear();
             vector<string> vec=responsejs["friends"];
@@ -261,7 +259,6 @@ void doLoginResponse(json& responsejs){
             }
         }
         if(responsejs.contains("groups")){
-            cout<<"run to here6"<<endl;
             //初始化
             g_currentUserGroupList.clear();
             vector<string> vec=responsejs["groups"];
@@ -294,7 +291,6 @@ void doLoginResponse(json& responsejs){
         showCurrentUserData();
         
         if(responsejs.contains("offlinemsg")){
-            cout<<"run to here7"<<endl;
             vector<string> vec=responsejs["offlinemsg"];
             for(string &str:vec){
                 //反序列化
@@ -310,7 +306,6 @@ void doLoginResponse(json& responsejs){
                 }
             }
         }        
-        cout<<"run to here8"<<endl;
         g_isLoginSuccess=true;
 
     }
@@ -346,14 +341,12 @@ void readTaskHandler(int clientfd){
             <<js["msg"].get<string>()<<endl;
             continue;
         }
-        cout<<"run to here1"<<endl;
         //处理群聊
         if (msgtype== GROUP_CHAT_MSG){
             cout<<js["time"].get<string>()<<" group message ["<<js["groupid"]<<"]"<<js["name"].get<string>()<<" said:"
             <<js["msg"].get<string>()<<endl;
             continue;
         }
-        cout<<"run to here2"<<endl;
         //登录成功，处理登录响应
         if(msgtype==LOGIN_MSG_ACK){
             doLoginResponse(js);
@@ -361,7 +354,6 @@ void readTaskHandler(int clientfd){
             sem_post(&rwsem);
             continue;
         }
-        cout<<"run to here3"<<endl;
         //注册成功，处理注册响应
         if(msgtype==REG_MSG_ACK){
             cout<<"doRegResponse"<<endl;
