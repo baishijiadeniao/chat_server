@@ -11,6 +11,7 @@
 #include"friendmodel.h"
 #include"offlinemessagemodel.h"
 #include"groupmodel.h"
+#include"Redis.h"
 
 using namespace muduo;
 using namespace muduo::net;
@@ -41,6 +42,8 @@ private:
     chatservice();
     ~chatservice();
     chatservice(const chatservice&);
+    //redis操作对象
+    Redis redis_;
     
 public:
     //单例模式获取静态对象接口
@@ -67,4 +70,6 @@ public:
     void groupChat(const TcpConnectionPtr& conn,json &js,Timestamp timestamp);
     //退出登录
     void loginout(const TcpConnectionPtr& conn,json &js,Timestamp timestamp);
+    //处理redis通道中上报业务层的信息
+    void handleRedisSubscribeMessage(int,string);
 };

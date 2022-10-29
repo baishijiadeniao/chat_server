@@ -21,6 +21,7 @@ sem_t rwsem;
 //显示当前登录用户的基本信息
 void showCurrentUserData();
 
+//以下三个变量都只在子线程中访问，因此不需要线程安全
 //记录当前系统登录的用户信息
 User g_currentUser;
 //记录当前登录用户的好友列表信息
@@ -110,7 +111,8 @@ int main(int argc,char** argv){
     }
     //读写线程通信的信号量
     sem_init(&rwsem,0,0);
-
+    
+    //创建一个子线程，子线程只作接收数据用，主线程只做发送数据用，否则两个线程会同时阻塞
     //接收端线程只启动一次，因为子线程在recv中被阻塞，不容易退出，多个连接共用一个接收端线程也不影响
     static int threadnum=0;
     if(threadnum==0){
@@ -325,15 +327,13 @@ void doRegResponse(json& responsejs){
 void readTaskHandler(int clientfd){
     for(;;){
         //接收数据
-        char buffer[1024];
+        char buffer[1024]={0};     //一定要初始化！血的教训
         int len=recv(clientfd,buffer,1024,0);
         if(len==0 || len==-1){
             close(clientfd);
             exit(-1);
         }
-        cout<<"len:"<<len<<endl;
         json js=json::parse(buffer);
-
         int msgtype=js["msgid"].get<int>();
         //处理好友聊天
         if(msgtype==ONE_CHAT_MSG){

@@ -12,7 +12,9 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/include/server)
 include_directories(${PROJECT_SOURCE_DIR}/include/server/db)
 include_directories(${PROJECT_SOURCE_DIR}/include/server/model)
+include_directories(${PROJECT_SOURCE_DIR}/include/server/redis)
 include_directories(${PROject_SOURCE_DIR}/thirdparty)
 
+link_directories(/user/lib64/mysql)
 #加载子目录的CMakeLists.txt
 add_subdirectory(src)

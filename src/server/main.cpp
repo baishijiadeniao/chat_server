@@ -11,10 +11,17 @@ void resetHandler(int){
     exit(0);
 }
 
-int main(){
+int main(int argc,char** argv){
+    if(argc<3){
+        //cerr输出error
+        cerr<<"command invalid! example: ./ChatServer 127.0.0.1 6000"<<endl;
+        exit(-1);
+    }
+    int server_port=atoi(argv[2]);
+    char* ip=argv[1];
     EventLoop loop;
     signal(SIGINT,resetHandler);
-    InetAddress listenaddr("127.0.0.1",6000);
+    InetAddress listenaddr(ip,server_port);
     ChatServer chatserver(&loop,listenaddr,"my_server");
     chatserver.start();
     //epoll_wait以阻塞的方式等待新用户的连接或读写事件的发生等
