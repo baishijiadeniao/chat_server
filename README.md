@@ -48,7 +48,7 @@ sh install.sh
 
 ## 启动
 cd ${PROJECT_DIR}/bin  
-启动服务器： ./ChatServer   127.0.0.1 6000
+启动服务器： ./ChatServer   127.0.0.1 6000  
 启动客户端： ./ChatClient   127.0.0.1 6000
 
 
