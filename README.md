@@ -1,6 +1,7 @@
 # 基于muduo的集群服务器设计
 
 本集群服务器项目基于muduo网络库进行设计，通过nginx进行负载均衡，使用基于发布订阅的消息队列redis进行服务器之间的通信。
+![](./media/%E9%9B%86%E7%BE%A4%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%A8%A1%E5%9D%97%E5%9B%BE.jpg)
 
 ## install
 安装mysql，修改mysql用户名为root，密码为123456，也可以在源码中替换为你自己的账号和用户名。  进入msql中，执行mysql脚本文件： source ./chat_server.sql
