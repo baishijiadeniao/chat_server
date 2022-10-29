@@ -26,7 +26,7 @@
 |groupname|varchar(50)|群聊名称|NOT NULL| 
 |groupdesc|varchar(200)|群聊简介|default ''| 
   
-**Friend**  
+**GroupUser**  
 |字段名称|字段类型|字段说明|约束|  
 |-------|--------|-------|------|
 |groupid|int|群好友id|NOT NULL、联合主键|
