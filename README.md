@@ -40,7 +40,9 @@
 |userid|int|用户id|NOT NULL|    
 |message|varchar(500)|离线消息内容|NOT NULL|
 
-安装redis   
+安装redis
+
+安装hiredis
 
 安装nginx
 configure 加上--with-stream参数
