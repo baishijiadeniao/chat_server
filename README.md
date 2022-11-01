@@ -23,7 +23,7 @@
 **AllGroup**  
 |字段名称|字段类型|字段说明|约束|  
 |-------|--------|-------|------|
-|id|int|用户id|PRIMARY KEY、AUTO_INCREMENT|  
+|id|int|群id|PRIMARY KEY、AUTO_INCREMENT|  
 |groupname|varchar(50)|群聊名称|NOT NULL| 
 |groupdesc|varchar(200)|群聊简介|default ''| 
   
