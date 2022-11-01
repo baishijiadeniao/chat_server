@@ -19,6 +19,7 @@ int main(int argc,char** argv){
     }
     int server_port=atoi(argv[2]);
     char* ip=argv[1];
+    
     EventLoop loop;
     signal(SIGINT,resetHandler);
     InetAddress listenaddr(ip,server_port);

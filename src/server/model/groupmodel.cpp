@@ -6,13 +6,15 @@ bool groupModel::createGroup(Group &group){
     sprintf(sql,"insert into AllGroup(groupname,groupdesc) values('%s','%s')",
             group.getName().c_str(),group.getDesc().c_str());
     MySQL mysql;
-    if(mysql.connect()){
-        //groupname不可以重复，否则不能创建成功
-        if(mysql.update(sql)){
-            //获取插入成功的用户数据生成的主键id;
-            group.setId(mysql_insert_id(mysql.getConnection()));
-            return true;
+    //groupname不可以重复，否则不能创建成功
+    if(mysql.update(sql)){
+        //获取插入成功的用户数据生成的主键id;
+        MYSQL_RES* res=mysql.query("select max(id) from AllGroup");
+        if(res != nullptr){
+            MYSQL_ROW row=mysql_fetch_row(res);
+            group.setId(atoi(row[0]));
         }
+        return true;
     }
     return false;
 }
@@ -21,10 +23,8 @@ bool groupModel::addGroup(int userid,int groupid,string role){
     char sql[1024]={0};
     sprintf(sql,"insert into GroupUser values(%d,%d,'%s')",groupid,userid,role.c_str());
     MySQL mysql;
-    if(mysql.connect()){
-        if(mysql.update(sql)){
-            return true;
-        }
+    if(mysql.update(sql)){
+        return true;
     }
     return false;
 }
@@ -36,37 +36,33 @@ vector<Group> groupModel::queryGroups(int userid){
     
     vector<Group> groupvec;
     MySQL mysql;
-    if(mysql.connect()){
-        MYSQL_RES* res=mysql.query(sql);
-        if(res != nullptr){
-            MYSQL_ROW row;
-            while((row=mysql_fetch_row(res)) != nullptr){
-                Group group;
-                group.setId(atoi(row[0]));
-                group.setName(row[1]);
-                group.setDesc(row[2]);
-                groupvec.push_back(group);
-            }
-            mysql_free_result(res);
+    MYSQL_RES* res=mysql.query(sql);
+    if(res != nullptr){
+        MYSQL_ROW row;
+        while((row=mysql_fetch_row(res)) != nullptr){
+            Group group;
+            group.setId(atoi(row[0]));
+            group.setName(row[1]);
+            group.setDesc(row[2]);
+            groupvec.push_back(group);
         }
+        mysql_free_result(res);
     }
     for(Group &group:groupvec){
         sprintf(sql,"select a.id,a.name,a.state,b.grouprole from User a inner join GroupUser b on b.userid=a.id where b.groupid=%d",group.getId());
         MySQL mysql;
-        if(mysql.connect()){
-            MYSQL_RES* res=mysql.query(sql);
-            if(res != nullptr){
-                MYSQL_ROW row;
-                while((row=mysql_fetch_row(res)) != nullptr){
-                    GroupUser groupuser;
-                    groupuser.setId(atoi(row[0]));
-                    groupuser.setName(row[1]);
-                    groupuser.setState(row[2]);
-                    groupuser.setRole(row[3]);
-                    group.getUsers().push_back(groupuser);
-                }
-                mysql_free_result(res);
+        MYSQL_RES* res=mysql.query(sql);
+        if(res != nullptr){
+            MYSQL_ROW row;
+            while((row=mysql_fetch_row(res)) != nullptr){
+                GroupUser groupuser;
+                groupuser.setId(atoi(row[0]));
+                groupuser.setName(row[1]);
+                groupuser.setState(row[2]);
+                groupuser.setRole(row[3]);
+                group.getUsers().push_back(groupuser);
             }
+            mysql_free_result(res);
         }
     }
     return groupvec;
@@ -78,15 +74,13 @@ vector<int> groupModel::queryGroupUsers(int userid,int groupid){
     sprintf(sql,"select userid from GroupUser where groupid = %d and userid != %d",groupid,userid);
     vector<int> idVec;
     MySQL mysql;
-    if(mysql.connect()){
-        MYSQL_RES* res=mysql.query(sql);
-        if(res != nullptr){
-            MYSQL_ROW row;
-            while((row=mysql_fetch_row(res)) != nullptr){
-                idVec.push_back(atoi(row[0]));
-            }
-            mysql_free_result(res);
+    MYSQL_RES* res=mysql.query(sql);
+    if(res != nullptr){
+        MYSQL_ROW row;
+        while((row=mysql_fetch_row(res)) != nullptr){
+            idVec.push_back(atoi(row[0]));
         }
+        mysql_free_result(res);
     }
     return idVec;
 }

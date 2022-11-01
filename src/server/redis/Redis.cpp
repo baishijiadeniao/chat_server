@@ -2,7 +2,7 @@
 #include <iostream>
 // using namespace std;
 
-Redis::Redis():publish_context_(nullptr),subscribe_context_(nullptr){
+Redis::Redis():publish_context_(nullptr),subscribe_context_(nullptr),cache_(nullptr){
     
 }
 
@@ -12,6 +12,9 @@ Redis::~Redis(){
     }
     if(subscribe_context_ !=nullptr){
         redisFree(subscribe_context_);
+    }
+    if(cache_ !=nullptr){
+        redisFree(cache_);
     }
 }
 
@@ -24,6 +27,11 @@ bool Redis::connect(){
     }
     subscribe_context_=redisConnect("127.0.0.1",6379);
     if(nullptr==subscribe_context_){
+        cerr<<"connect redis fail"<<endl;
+        return false;
+    }
+    cache_=redisConnect("127.0.0.1",6379);
+    if(nullptr==cache_){
         cerr<<"connect redis fail"<<endl;
         return false;
     }
@@ -111,4 +119,41 @@ void Redis::observer_channel_message(){
 //初始化项业务层上报消息的回调对象
 void Redis::init_notify_handler(function<void(int,string)> fn){
     this->notify_message_handler=fn;
+}
+
+string Redis::get(int key){
+     redisReply* reply = (redisReply*)redisCommand(this->cache_,
+                        "get %d",key);
+    if(reply==nullptr){
+        cerr<<"get redis fail"<<endl;
+    }
+    string res="";
+    if (reply->str)
+    {
+        res=reply->str;
+    }
+    freeReplyObject(reply);
+    return res;   
+}
+
+bool Redis::set(int key,string value){
+     redisReply* reply = (redisReply*)redisCommand(this->cache_,
+                        "set %d %s",key,value.c_str());
+    if(reply==nullptr){
+        cerr<<"set redis fail"<<endl;
+        return false;
+    }
+    freeReplyObject(reply);
+    return true;   
+}
+
+bool Redis::del(int key){
+     redisReply* reply = (redisReply*)redisCommand(this->cache_,
+                        "del %d",key);
+    if(reply==nullptr){
+        cerr<<"del redis fail"<<endl;
+        return false;
+    }
+    freeReplyObject(reply);
+    return true;
 }

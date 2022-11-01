@@ -8,6 +8,8 @@ using namespace std;
 class Redis
 {
 private:
+    //用于缓存的hiredis同步上下文对象
+    redisContext* cache_;
     //用于发布消息的hiredis同步上下文对象
     redisContext* publish_context_;
     //用于订阅消息的hiredis同步上下文对象
@@ -19,6 +21,7 @@ public:
     ~Redis();
     //连接redis服务器
     bool connect();
+    //分布式锁
     //向redis指定的订阅通道channel发布消息
     bool publish(int channel,string message);
     //向redis指定的订阅通道channel订阅消息
@@ -29,4 +32,11 @@ public:
     void observer_channel_message();
     //初始化项业务层上报消息的回调对象
     void init_notify_handler(function<void(int,string)> fn);
+    //缓存
+    //获取key对应的键
+    string get(int key);
+    //添加键值对
+    bool set(int key,string value);
+    //删除缓存
+    bool del(int key);
 };

@@ -36,7 +36,7 @@ void chatservice::reset(){
     usermodel_.resetState();
 }
 
-//更新用户状态
+//用户登录，更新用户状态
 void chatservice::login(const TcpConnectionPtr& conn,json &js,Timestamp timestamp){
     LOG_INFO<<"do login handle";
     int id =js["id"].get<int>();
@@ -68,9 +68,10 @@ void chatservice::login(const TcpConnectionPtr& conn,json &js,Timestamp timestam
             response["name"]=user.getName();
 
             //向redis服务器订阅通道
-            if(!redis_.subscribe(user.getId())){
-                cerr<<"subscribe error"<<endl;
-            }
+            redis_.subscribe(user.getId());
+
+            //将用户状态写入缓存
+            redis_.set(user.getId(),user.getState());
 
             //查询用户是否有离线消息
             vector<string> vec;
@@ -175,6 +176,7 @@ MessageHandle chatservice::getHandler(int msgid){
     }
 }
 
+//处理客户端异常退出
 void chatservice::clientCloseException(const TcpConnectionPtr& conn){
     User user;
     {
@@ -187,6 +189,9 @@ void chatservice::clientCloseException(const TcpConnectionPtr& conn){
             }
         }
     }
+
+    //这里采用先更新数据库，再删除缓存的方法
+
     //如果用户存在则修改用户在线状态
     if(user.getId() != -1){
         user.setState("offline");
@@ -197,6 +202,9 @@ void chatservice::clientCloseException(const TcpConnectionPtr& conn){
     if(!redis_.unsubscribe(user.getId())){
         cerr<<"unsubscribe error"<<endl;
     }
+
+    //删除缓存
+    redis_.del(user.getId());
 }
 
 //一对一聊天业务
@@ -214,7 +222,13 @@ void chatservice::onechat(const TcpConnectionPtr& conn,json &js,Timestamp timest
     }
 
     //如果用户在线，说明是在其他服务器上登录的
-    if(usermodel_.query(toid).getState()=="online"){
+    string state=redis_.get(toid);
+    if(state.empty()){
+        //如果state查不到再去mysql找,然后将用户状态写入redis缓存
+        state=usermodel_.query(toid).getState();
+        redis_.set(toid,state);
+    }
+    if(state=="online"){
         redis_.publish(toid,js.dump());
         return;
     }
@@ -263,7 +277,15 @@ void chatservice::groupChat(const TcpConnectionPtr& conn,json &js,Timestamp time
             //用户在线,直接转发消息
             it->second->send(js.dump());
         }else{
-            if(usermodel_.query(toid).getState()=="online"){
+            //如果用户在线，说明是在其他服务器上登录的
+            //先查redis缓存
+            string state=redis_.get(toid);
+            if(state.empty()){
+                //如果state查不到再去mysql找,然后将用户状态写入redis缓存
+                state=usermodel_.query(toid).getState();
+                redis_.set(toid,state);
+            }
+            if(state=="online"){
                 //如果用户在线，说明是在其他服务器上登录的
                 redis_.publish(toid,js.dump());
             }else{
@@ -287,6 +309,8 @@ void chatservice::loginout(const TcpConnectionPtr& conn,json &js,Timestamp times
         }
     }
 
+    //这里采用先更新数据库，再删除缓存的方法，顺序不可以调换
+
     //更新用户的状态信息
     User user(id,"","","offline");
     usermodel_.updateState(user);
@@ -295,6 +319,9 @@ void chatservice::loginout(const TcpConnectionPtr& conn,json &js,Timestamp times
     if(!redis_.unsubscribe(id)){
         cerr<<"unsubscribe error"<<endl;
     }
+
+    //删除缓存
+    redis_.del(id);
 }
 
 //处理redis通道中上报业务层的信息
