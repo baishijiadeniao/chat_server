@@ -157,3 +157,40 @@ bool Redis::del(int key){
     freeReplyObject(reply);
     return true;
 }
+
+bool Redis::hset(string key,string field,int value){
+     redisReply* reply = (redisReply*)redisCommand(this->cache_,
+                        "hset %s %s %d",key.c_str(),field.c_str(),value);
+    if(reply==nullptr){
+        cerr<<"hset redis fail"<<endl;
+        return false;
+    }
+    freeReplyObject(reply);
+    return true; 
+}
+
+string Redis::hget(string key,string field){
+     redisReply* reply = (redisReply*)redisCommand(this->cache_,
+                        "hget %s %s",key.c_str(),field.c_str());
+    if(reply==nullptr){
+        cerr<<"hget redis fail"<<endl;
+    }
+    string res="";
+    if (reply->str)
+    {
+        res=reply->str;
+    }
+    freeReplyObject(reply);
+    return res;  
+}
+
+bool Redis::expire(string key,int second){
+     redisReply* reply = (redisReply*)redisCommand(this->cache_,
+                        "expire %s %d",key.c_str(),second);
+    if(reply==nullptr){
+        cerr<<"expire redis fail"<<endl;
+        return false;
+    }
+    freeReplyObject(reply);
+    return true;     
+}

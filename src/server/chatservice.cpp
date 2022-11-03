@@ -12,6 +12,7 @@ chatservice* chatservice::getInstance(){
 chatservice::chatservice(){
     //回调事件注册
     messageHandlerMap_.insert({LOGIN_MSG,std::bind(&chatservice::login,this,_1,_2,_3)});
+    messageHandlerMap_.insert({COOKIE_MSG,std::bind(&chatservice::login,this,_1,_2,_3)});
     messageHandlerMap_.insert({REG_MSG,std::bind(&chatservice::reg,this,_1,_2,_3)});
     messageHandlerMap_.insert({ONE_CHAT_MSG,std::bind(&chatservice::onechat,this,_1,_2,_3)});
     messageHandlerMap_.insert({ADD_FRIEND_MSG,std::bind(&chatservice::addFriend,this,_1,_2,_3)});
@@ -40,15 +41,44 @@ void chatservice::reset(){
 void chatservice::login(const TcpConnectionPtr& conn,json &js,Timestamp timestamp){
     LOG_INFO<<"do login handle";
     int id =js["id"].get<int>();
-    string password=js["password"];
-    User user=usermodel_.query(id);
-    if(id == user.getId() && user.getPwd()==password){
-        if (user.getState()== "online")
+    bool login_pass=false;
+    //cookie登录
+    if(js["msgid"].get<int>() == COOKIE_MSG){
+        string cookie=string(js["cookie"]).substr(7);
+        string res=redis_.hget(cookie,"id");
+        if(!res.empty()){
+            login_pass=true;
+        }else{
+            //用户cookie失效
+            json response;
+            response["msgid"]=LOGIN_MSG_ACK;
+            response["errno"]=3;
+            response["errmsg"]="用户cookie失效";
+            conn->send(response.dump());
+        }
+    }
+    //密码登录
+    else{
+        string password=js["password"];
+        User user=usermodel_.query(id);
+        if(id == user.getId() && user.getPwd()==password){
+            login_pass=true;
+        }else{
+            //密码错误或账号不存在
+            json response;
+            response["msgid"]=LOGIN_MSG_ACK;
+            response["errno"]=2;
+            response["errmsg"]="密码错误或账号不存在";
+            conn->send(response.dump());
+        }
+    }
+    if(login_pass){
+        if (redis_.get(id)== "online")
         {
             //用户已经登录，请勿重复登录
             json response;
             response["msgid"]=LOGIN_MSG_ACK;
-            response["errno"]=2;
+            response["errno"]=4;
             response["errmsg"]="该账号已经登录";
             conn->send(response.dump());
         }else{
@@ -57,8 +87,10 @@ void chatservice::login(const TcpConnectionPtr& conn,json &js,Timestamp timestam
             {
                 //STL容器是非线程安全的，所以要设置互斥锁
                 lock_guard<mutex> lock(connMutex_);
-                userConnMap_.insert({user.getId(),conn});
+                userConnMap_.insert({id,conn});
             }
+            User user;
+            user.setId(id);
             //更新状态
             user.setState("online");
             usermodel_.updateState(user);
@@ -72,6 +104,25 @@ void chatservice::login(const TcpConnectionPtr& conn,json &js,Timestamp timestam
 
             //将用户状态写入缓存
             redis_.set(user.getId(),user.getState());
+
+            //将cookie存入redis
+            string str1="ok";
+            srand(time(NULL));
+            for(int i=0;i<10;i++){
+                //type为0代表数字，为1代表小写字母，为2代表大写字母
+                int type=rand()%3;
+                if(type==0)
+                    str1 +='0'+rand()%9;
+                if(type==1)
+                    str1 +='a'+rand()%26;
+                if(type==2)
+                    str1 +='A'+rand()%26;
+            }
+            redis_.hset(str1.substr(2).c_str(),"id",user.getId());
+            //设置缓存时间为300s
+            redis_.expire(str1.substr(2).c_str(),300);
+
+            response["cookie"]=str1.substr(2);
 
             //查询用户是否有离线消息
             vector<string> vec;
@@ -124,15 +175,7 @@ void chatservice::login(const TcpConnectionPtr& conn,json &js,Timestamp timestam
             
             conn->send(response.dump());
         }
-    }else{
-        //密码错误或账号不存在
-        json response;
-        response["msgid"]=LOGIN_MSG_ACK;
-        response["errno"]=2;
-        response["errmsg"]="密码错误或账号不存在";
-        conn->send(response.dump());
     }
-
 }
 
 //处理注册业务

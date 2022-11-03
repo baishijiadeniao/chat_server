@@ -5,6 +5,7 @@
 #include<sys/socket.h>
 #include <arpa/inet.h>
 #include<iostream>
+#include<fstream>
 #include<netinet/in.h>
 #include<atomic>
 #include<semaphore.h>
@@ -31,6 +32,8 @@ vector<Group> g_currentUserGroupList;
 
 //记录的登录状态,使用原子变量，初始化方式和普通布尔值不同
 atomic_bool g_isLoginSuccess{false};
+//是否已经登录
+atomic_bool logined{false};
 
 //控制主菜单页面程序
 bool isMainMenuRunning=false;
@@ -140,30 +143,54 @@ int main(int argc,char** argv){
         case 1: //登录业务
         {
             int id=-1;
-            char pwd[50]={0};
+            //初始化登录状态
+            g_isLoginSuccess=false;
             cout<<"id: ";
             cin>>id;
+            //读取掉缓冲区残留的回车符
             cin.get();
-            cout<<"password: ";
-            //不用cin<< ,因为无法读空格
-            cin.getline(pwd,50);
-    
-            json js;
-            js["msgid"]=LOGIN_MSG;
-            js["id"]=id;
-            js["password"]=pwd;
-            string request=js.dump();
+            //先检查是否存在cookie文件
+            ifstream cookie_file("cookie.txt");
+            string cookie_str;
+            if(cookie_file.good()){
+                cookie_file>>cookie_str;
+                cookie_file.close();
+                cookie_str="cookie:"+cookie_str;
+                //将cookie发送到服务器
+                json js;
+                js["msgid"]=COOKIE_MSG;
+                js["id"]=id;
+                js["cookie"]=cookie_str.c_str();
+                string request=js.dump();
 
-            g_isLoginSuccess=false;
-
-            int len=send(clientfd,request.c_str(),strlen(request.c_str())+1,0);
-            if(len==-1){
-                cerr<<"send login msg error"<<endl;
+                int len=send(clientfd,request.c_str(),strlen(request.c_str())+1,0);
+                if(len==-1){
+                    cerr<<"send login msg error"<<endl;
+                }
+                //等待子线程处理完相应的相应消息，比如显示离线信息
+                sem_wait(&rwsem);                
             }
+            if(!logined && !g_isLoginSuccess){
+                char pwd[50]={0};
+                cout<<"password: ";
+                //不用cin<< ,因为无法读空格
+                cin.getline(pwd,50);
+        
+                json js;
+                js["msgid"]=LOGIN_MSG;
+                js["id"]=id;
+                js["password"]=pwd;
+                string request=js.dump();
 
-            //等待子线程处理完相应的相应消息，比如显示离线信息
-            sem_wait(&rwsem);
-            
+
+                int len=send(clientfd,request.c_str(),strlen(request.c_str())+1,0);
+                if(len==-1){
+                    cerr<<"send login msg error"<<endl;
+                }
+                //等待子线程处理完相应的相应消息，比如显示离线信息
+                sem_wait(&rwsem);                
+            }
+            logined=false;
             if(g_isLoginSuccess){
                 //登录完成，进入聊天主菜单页面
                 isMainMenuRunning = true;
@@ -236,10 +263,18 @@ void doLoginResponse(json& responsejs){
     if(0 != responsejs["errno"].get<int>()){
         //登录失败
         cerr<< responsejs["errmsg"]<<endl;
+        if(responsejs["errno"].get<int>() == 4){
+            logined=true;
+        }
         g_isLoginSuccess=false;
     }else{
-
         //登录成功
+
+        //设置cookie.txt
+        string tmpstr=responsejs["cookie"];
+        tmpstr="cat > cookie.txt<<end \n"+tmpstr+"\nend";
+        system(tmpstr.c_str());
+
         //设置g_currentUser
         g_currentUser.setId(responsejs["id"].get<int>());
         g_currentUser.setName(responsejs["name"]);

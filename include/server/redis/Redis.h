@@ -39,4 +39,10 @@ public:
     bool set(int key,string value);
     //删除缓存
     bool del(int key);
+    //添加哈希值
+    bool hset(string key,string field,int value);
+    //获取哈希值
+    string hget(string key,string field);
+    //设置redis缓存时间
+    bool expire(string key,int second);  
 };
