@@ -1,6 +1,7 @@
 #include "chatservice.h"
 #include "public.h"
 #include "user.h"
+#include "Consumer.h"
 #include<muduo/base/Logging.h>
 #include<iostream>
 
@@ -22,11 +23,11 @@ chatservice::chatservice(){
     messageHandlerMap_.insert({LOGINOUT_MSG,std::bind(&chatservice::loginout,this,_1,_2,_3)});
 
     //连接redis服务器，注册订阅通道消息处理回调
-    if(redis_.connect()){
-        redis_.init_notify_handler(std::bind(&chatservice::handleRedisSubscribeMessage,this,_1,_2));
-    }else{
+    if(! redis_.connect()){
         cerr<<"redis connect error"<<endl;
     }
+    broker_="127.0.0.1:9092";
+    producer_.reset(new Producer(broker_));
 }
 
 chatservice::~chatservice(){
@@ -46,7 +47,7 @@ void chatservice::login(const TcpConnectionPtr& conn,json &js,Timestamp timestam
     if(js["msgid"].get<int>() == COOKIE_MSG){
         string cookie=string(js["cookie"]).substr(7);
         string res=redis_.hget(cookie,"id");
-        if(!res.empty()){
+        if(res==to_string(id)){
             login_pass=true;
         }else{
             //用户cookie失效
@@ -56,6 +57,7 @@ void chatservice::login(const TcpConnectionPtr& conn,json &js,Timestamp timestam
             response["errmsg"]="用户cookie失效";
             conn->send(response.dump());
         }
+        cout<<"run to here1"<<endl;
     }
     //密码登录
     else{
@@ -100,8 +102,24 @@ void chatservice::login(const TcpConnectionPtr& conn,json &js,Timestamp timestam
             response["name"]=user.getName();
 
             //向redis服务器订阅通道
-            redis_.subscribe(user.getId());
-
+            // redis_.subscribe(user.getId());
+            //kafka: 向topic消费消息
+            unique_ptr<Consumer> consu(new Consumer(broker_,to_string(id)));
+            if(consu->consume()){
+                consu->init_notify_handler(std::bind(&chatservice::handleRedisSubscribeMessage,this,_1,_2));
+                consumerMap_.insert({id,std::move(consu)}); //unique_ptr不允许拷贝，所以要先转化为右值
+            }else{
+                cerr<<"kafka connect error"<<endl;
+                json responseErr;
+                responseErr["msgid"]=LOGIN_MSG_ACK;
+                responseErr["errno"]=4;
+                responseErr["errmsg"]="登陆失败";
+                conn->send(responseErr.dump());
+                auto it=userConnMap_.find(id);
+                userConnMap_.erase(it);
+                return;
+            }
+            
             //将用户状态写入缓存
             redis_.set(user.getId(),user.getState());
 
@@ -242,8 +260,15 @@ void chatservice::clientCloseException(const TcpConnectionPtr& conn){
     }
 
     //向redis服务器取消订阅
-    if(!redis_.unsubscribe(user.getId())){
-        cerr<<"unsubscribe error"<<endl;
+    // if(!redis_.unsubscribe(user.getId())){
+    //     cerr<<"unsubscribe error"<<endl;
+    // }
+
+    //删除连接对应的Consumer
+    auto consumerIt=consumerMap_.find(user.getId());
+    if(consumerIt !=consumerMap_.end()){
+        consumerIt->second.release();
+        consumerMap_.erase(consumerIt);
     }
 
     //删除缓存
@@ -272,7 +297,8 @@ void chatservice::onechat(const TcpConnectionPtr& conn,json &js,Timestamp timest
         redis_.set(toid,state);
     }
     if(state=="online"){
-        redis_.publish(toid,js.dump());
+        // redis_.publish(toid,js.dump());
+        producer_->produce(to_string(toid),js.dump());
         return;
     }
     //用户不在线，需要先缓存消息，等待用户上线再转发
@@ -330,7 +356,8 @@ void chatservice::groupChat(const TcpConnectionPtr& conn,json &js,Timestamp time
             }
             if(state=="online"){
                 //如果用户在线，说明是在其他服务器上登录的
-                redis_.publish(toid,js.dump());
+                // redis_.publish(toid,js.dump());
+                producer_->produce(to_string(toid),js.dump());
             }else{
                 //用户不在线，需要先缓存消息，等待用户上线再转发
                 offlineMsgModel_.insert(toid,js.dump());
@@ -359,9 +386,14 @@ void chatservice::loginout(const TcpConnectionPtr& conn,json &js,Timestamp times
     usermodel_.updateState(user);
 
     //向redis服务器取消订阅
-    if(!redis_.unsubscribe(id)){
-        cerr<<"unsubscribe error"<<endl;
-    }
+    // if(!redis_.unsubscribe(id)){
+    //     cerr<<"unsubscribe error"<<endl;
+    // }
+    
+    //删除连接对应的Consumer
+    auto consumerIt=consumerMap_.find(user.getId());
+    consumerIt->second.release();
+    consumerMap_.erase(consumerIt);
 
     //删除缓存
     redis_.del(id);

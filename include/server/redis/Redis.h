@@ -30,7 +30,7 @@ public:
     bool unsubscribe(int channel);
     //在独立线程中接收订阅通道中的消息
     void observer_channel_message();
-    //初始化项业务层上报消息的回调对象
+    //初始化向业务层上报消息的回调对象
     void init_notify_handler(function<void(int,string)> fn);
     //缓存
     //获取key对应的键

@@ -5,6 +5,7 @@
 #include<muduo/net/InetAddress.h>
 #include<unordered_map>
 #include<functional>
+#include<memory>
 #include<json.hpp>
 #include<mutex>
 #include"usermodel.h"
@@ -12,6 +13,8 @@
 #include"offlinemessagemodel.h"
 #include"groupmodel.h"
 #include"Redis.h"
+#include"Consumer.h"
+#include"Producer.h"
 
 using namespace muduo;
 using namespace muduo::net;
@@ -44,7 +47,12 @@ private:
     chatservice(const chatservice&);
     //redis操作对象
     Redis redis_;
-    
+    //kafka的boker服务器地址
+    string broker_;
+    //存储各个连接的Consumer对象指针
+    std::unordered_map<int,unique_ptr<Consumer>> consumerMap_;
+    //生产者对象
+    unique_ptr<Producer> producer_;
 public:
     //单例模式获取静态对象接口
     static chatservice* getInstance();

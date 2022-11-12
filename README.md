@@ -44,6 +44,8 @@
 
 安装hiredis
 
+安装并启动kafka
+
 安装nginx
 configure 加上--with-stream参数
 
