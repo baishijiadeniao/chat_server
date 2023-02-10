@@ -6,13 +6,12 @@ enum EnMsgType{
     //登陆消息
     LOGIN_MSG=1,
     LOGIN_MSG_ACK,
-    //cookie登录
-    COOKIE_MSG,
-    COOKIE_MSG_ACK,
-    //注册消息
-    REG_MSG,
+    //退出登录
+    LOGINOUT_MSG,
     //注册响应消息
     REG_MSG_ACK,
+    //注册消息
+    REG_MSG,
     
     //聊天消息
     ONE_CHAT_MSG,
@@ -25,6 +24,7 @@ enum EnMsgType{
     ADD_GROUP_MSG,
     //发送群聊消息
     GROUP_CHAT_MSG,
-    //退出登录
-    LOGINOUT_MSG
+    //cookie登录
+    COOKIE_MSG,
+    COOKIE_MSG_ACK
 };

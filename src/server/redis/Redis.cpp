@@ -122,8 +122,12 @@ void Redis::init_notify_handler(function<void(int,string)> fn){
 }
 
 string Redis::get(int key){
-     redisReply* reply = (redisReply*)redisCommand(this->cache_,
+    redisReply* reply;
+    {
+        lock_guard<mutex> lock(redisMutex_);
+        reply = (redisReply*)redisCommand(this->cache_,
                         "get %d",key);
+    }
     if(reply==nullptr){
         cerr<<"get redis fail"<<endl;
     }
@@ -137,8 +141,13 @@ string Redis::get(int key){
 }
 
 bool Redis::set(int key,string value){
-     redisReply* reply = (redisReply*)redisCommand(this->cache_,
-                        "set %d %s",key,value.c_str());
+    redisReply* reply;
+    {
+        lock_guard<mutex> lock(redisMutex_);
+        reply = (redisReply*)redisCommand(this->cache_,
+                                "set %d %s",key,value.c_str());
+    }
+    
     if(reply==nullptr){
         cerr<<"set redis fail"<<endl;
         return false;
@@ -148,8 +157,12 @@ bool Redis::set(int key,string value){
 }
 
 bool Redis::del(int key){
-     redisReply* reply = (redisReply*)redisCommand(this->cache_,
-                        "del %d",key);
+    redisReply* reply;
+    {
+        lock_guard<mutex> lock(redisMutex_);
+        reply = (redisReply*)redisCommand(this->cache_,
+                            "del %d",key);
+    }
     if(reply==nullptr){
         cerr<<"del redis fail"<<endl;
         return false;
@@ -159,8 +172,12 @@ bool Redis::del(int key){
 }
 
 bool Redis::hset(string key,string field,int value){
-     redisReply* reply = (redisReply*)redisCommand(this->cache_,
+    redisReply* reply;
+    {
+        lock_guard<mutex> lock(redisMutex_);
+        reply = (redisReply*)redisCommand(this->cache_,
                         "hset %s %s %d",key.c_str(),field.c_str(),value);
+    }
     if(reply==nullptr){
         cerr<<"hset redis fail"<<endl;
         return false;
@@ -170,8 +187,12 @@ bool Redis::hset(string key,string field,int value){
 }
 
 string Redis::hget(string key,string field){
-     redisReply* reply = (redisReply*)redisCommand(this->cache_,
+    redisReply* reply;
+    {
+        lock_guard<mutex> lock(redisMutex_);
+        reply = (redisReply*)redisCommand(this->cache_,
                         "hget %s %s",key.c_str(),field.c_str());
+    }
     if(reply==nullptr){
         cerr<<"hget redis fail"<<endl;
     }
@@ -185,8 +206,12 @@ string Redis::hget(string key,string field){
 }
 
 bool Redis::expire(string key,int second){
-     redisReply* reply = (redisReply*)redisCommand(this->cache_,
+    redisReply* reply;
+    {
+        lock_guard<mutex> lock(redisMutex_);
+        reply = (redisReply*)redisCommand(this->cache_,
                         "expire %s %d",key.c_str(),second);
+    }
     if(reply==nullptr){
         cerr<<"expire redis fail"<<endl;
         return false;

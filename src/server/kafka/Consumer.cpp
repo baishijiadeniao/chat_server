@@ -142,8 +142,8 @@ void ExampleEventCb::event_cb(RdKafka::Event& event){
             LOG_ERROR<< "FATAL ";
             MyConsumer_->setRun(false);
         }
-        LOG_ERROR<< "ERROR (" << RdKafka::err2str(event.err())
-            << "): " << event.str();
+        // LOG_ERROR<< "ERROR (" << RdKafka::err2str(event.err())
+        //     << "): " << event.str();
         break;
 
     case RdKafka::Event::EVENT_STATS:

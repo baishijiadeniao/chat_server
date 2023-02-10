@@ -14,6 +14,7 @@ bool UserModel::insert(User &user){
             MYSQL_ROW row=mysql_fetch_row(res);
             user.setId(atoi(row[0]));
         }
+        mysql_free_result(res);
         return true;
     }
     return false;
@@ -37,6 +38,7 @@ User UserModel::query(int id){
             return user;
         }
     }
+    mysql_free_result(res);
     return User();
 }
 

@@ -68,7 +68,8 @@ bool Producer::produce(const string& topicName,const string &messages){
         return false;
     }else{
         producer_->poll(0);
-        producer_->flush(5000);
+        //flush参数可调
+        producer_->flush(1000);
         return true;
     }
     // while (producer_->outq_len() > 0)

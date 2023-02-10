@@ -3,6 +3,7 @@
 #include <hiredis/hiredis.h>
 #include <thread>
 #include <functional>
+#include<mutex>
 using namespace std;
 
 class Redis
@@ -16,6 +17,8 @@ private:
     redisContext* subscribe_context_;
     //回调操作，收到订阅的消息，给service上报
     function<void(int,string)> notify_message_handler;
+    //互斥锁
+    mutex redisMutex_;
 public:
     Redis();
     ~Redis();

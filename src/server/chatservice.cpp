@@ -43,6 +43,7 @@ void chatservice::login(const TcpConnectionPtr& conn,json &js,Timestamp timestam
     LOG_INFO<<"do login handle";
     int id =js["id"].get<int>();
     bool login_pass=false;
+    User loginuser;
     //cookie登录
     if(js["msgid"].get<int>() == COOKIE_MSG){
         string cookie=string(js["cookie"]).substr(7);
@@ -57,13 +58,12 @@ void chatservice::login(const TcpConnectionPtr& conn,json &js,Timestamp timestam
             response["errmsg"]="用户cookie失效";
             conn->send(response.dump());
         }
-        cout<<"run to here1"<<endl;
     }
     //密码登录
     else{
         string password=js["password"];
-        User user=usermodel_.query(id);
-        if(id == user.getId() && user.getPwd()==password){
+        loginuser=usermodel_.query(id);
+        if(id == loginuser.getId() && loginuser.getPwd()==password){
             login_pass=true;
         }else{
             //密码错误或账号不存在
@@ -75,7 +75,8 @@ void chatservice::login(const TcpConnectionPtr& conn,json &js,Timestamp timestam
         }
     }
     if(login_pass){
-        if (redis_.get(id)== "online")
+        //这里要修改为使用mysql查询
+        if (loginuser.getState()== "online")
         {
             //用户已经登录，请勿重复登录
             json response;
@@ -100,7 +101,6 @@ void chatservice::login(const TcpConnectionPtr& conn,json &js,Timestamp timestam
             response["errno"]=0;
             response["id"]=user.getId();
             response["name"]=user.getName();
-
             //向redis服务器订阅通道
             // redis_.subscribe(user.getId());
             //kafka: 向topic消费消息
@@ -119,10 +119,8 @@ void chatservice::login(const TcpConnectionPtr& conn,json &js,Timestamp timestam
                 userConnMap_.erase(it);
                 return;
             }
-            
             //将用户状态写入缓存
             redis_.set(user.getId(),user.getState());
-
             //将cookie存入redis
             string str1="ok";
             srand(time(NULL));
@@ -139,9 +137,8 @@ void chatservice::login(const TcpConnectionPtr& conn,json &js,Timestamp timestam
             redis_.hset(str1.substr(2).c_str(),"id",user.getId());
             //设置缓存时间为300s
             redis_.expire(str1.substr(2).c_str(),300);
-
+            
             response["cookie"]=str1.substr(2);
-
             //查询用户是否有离线消息
             vector<string> vec;
             vec=offlineMsgModel_.query(id);
@@ -150,7 +147,6 @@ void chatservice::login(const TcpConnectionPtr& conn,json &js,Timestamp timestam
                 //读取该用户的离线消息后需要把该离线消息从数据库删除
                 offlineMsgModel_.remove(id);
             }
-
             //查询好友列表
             vector<User> userVec;
             userVec=friendmodel_.query(id);
@@ -165,7 +161,6 @@ void chatservice::login(const TcpConnectionPtr& conn,json &js,Timestamp timestam
                 }
                 response["friends"]=vec2;
             }
-
             //查询群聊列表
             vector<Group> groupVec;
             groupVec=groupModel_.queryGroups(id);
@@ -213,6 +208,16 @@ void chatservice::reg(const TcpConnectionPtr& conn,json &js,Timestamp timestamp)
         response["errno"]=0;
         response["id"]=user.getId();
         conn->send(response.dump());
+
+        //作用是创建topic
+        // json welcome_message;
+        // welcome_message["msgid"]=ONE_CHAT_MSG;
+        // welcome_message["id"]=user.getId();
+        // welcome_message["name"]=user.getName();
+        // welcome_message["toid"]=user.getId();
+        // welcome_message["msg"]="welcome to chat_server!";
+        // welcome_message["time"]=" ";
+        // producer_->produce(to_string(user.getId()),welcome_message.dump());
     }else{
         //注册失败
         json response;
@@ -378,23 +383,19 @@ void chatservice::loginout(const TcpConnectionPtr& conn,json &js,Timestamp times
             userConnMap_.erase(it);
         }
     }
-
     //这里采用先更新数据库，再删除缓存的方法，顺序不可以调换
 
     //更新用户的状态信息
     User user(id,"","","offline");
     usermodel_.updateState(user);
-
     //向redis服务器取消订阅
     // if(!redis_.unsubscribe(id)){
     //     cerr<<"unsubscribe error"<<endl;
     // }
-    
     //删除连接对应的Consumer
     auto consumerIt=consumerMap_.find(user.getId());
     consumerIt->second.release();
     consumerMap_.erase(consumerIt);
-
     //删除缓存
     redis_.del(id);
 }
