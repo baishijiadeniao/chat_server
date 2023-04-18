@@ -1,7 +1,7 @@
 # 基于muduo的集群服务器设计
 
 本集群服务器项目基于muduo网络库进行设计，通过redis缓存服务、mysql数据库连接池、cookie登录、多线程等技术，实现了基于TCP协议的高并发集群聊天服务器，同时使用中间件kafka进行服务器之间的通信，方便服务器扩展。
-![](./media/%E9%9B%86%E7%BE%A4%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%A8%A1%E5%9D%97%E5%9B%BE.jpg)
+![](./media/集群服务器最新.jpg)
 
 ## install
 安装mysql，修改mysql用户名为root，密码为123456，也可以在源码中替换为你自己的账号和用户名。  进入msql中，执行mysql脚本文件： source ./chat_server.sql
